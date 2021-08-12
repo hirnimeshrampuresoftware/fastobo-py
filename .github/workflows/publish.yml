@@ -44,9 +44,9 @@ jobs:
           name: wheels
           path: dist/*
 
-  wheel-linux:
+  wheel-linux-aarch64:
     runs-on: ubuntu-latest
-    name: Build Linux wheels
+    name: Build Aarch64 Linux wheels
     strategy:
       matrix:
         include:

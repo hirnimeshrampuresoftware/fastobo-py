@@ -1,9 +1,9 @@
 name: Publish to PyPI
 
-on:
-  push:
-    tags:
-      - v*.*.*
+on: [push]
+ # push:
+  #  tags:
+   #   - v*.*.*
 
 jobs:
 
@@ -44,6 +44,38 @@ jobs:
           name: wheels
           path: dist/*
 
+  wheel-linux:
+    runs-on: ubuntu-latest
+    name: Build Linux wheels
+    strategy:
+      matrix:
+        include:
+        - python-version: 3.6
+          pyo3-python: /opt/python/cp36-cp36m/bin/python
+        - python-version: 3.7
+          pyo3-python: /opt/python/cp37-cp37m/bin/python
+        - python-version: 3.8
+          pyo3-python: /opt/python/cp38-cp38/bin/python
+        - python-version: 3.9
+          pyo3-python: /opt/python/cp39-cp39/bin/python
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Build manylinux wheels
+      uses: addnab/docker-run-action@v2
+      with:
+        image: quay.io/pypa/manylinux2014_aarch64
+        options: -v ${{ github.workspace }}:/io -e TERM=$TERM
+        shell: bash
+        run: |
+          ${{ matrix.pyo3-python }} -m pip install -U -r /io/ci/requirements.txt
+          ${{ matrix.pyo3-python }} -m pip wheel -vv /io -w /tmp
+          for whl in /tmp/*.whl; do ${{ matrix.pyo3-python }} -m auditwheel repair $whl -w /io/dist; done
+    - name: Store built wheels
+      uses: actions/upload-artifact@v2
+      with:
+          name: wheels
+          path: dist/*
   wheel-osx:
     runs-on: macos-latest
     name: Build OSX wheels

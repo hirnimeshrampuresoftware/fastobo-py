@@ -71,9 +71,12 @@ jobs:
         options: -v ${{ github.workspace }}:/io -e TERM=$TERM
         shell: bash
         run: |
+          uname -m
           ${{ matrix.pyo3-python }} -m pip install -U -r /io/ci/requirements.txt
           ${{ matrix.pyo3-python }} -m pip wheel -vv /io -w /tmp
+          uname -m
           for whl in /tmp/*.whl; do ${{ matrix.pyo3-python }} -m auditwheel repair $whl -w /io/dist; done
+          uname -m
     - name: Store built wheels
       uses: actions/upload-artifact@v2
       with:
